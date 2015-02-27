@@ -107,6 +107,14 @@ io.sockets.on('connection', function (socket) {
 				};
 				console.dir(obj);
 				socket.emit('done', obj);
+
+				// fermer le fichier !
+				fs.close(files[name]['handler'], function (err) {
+					if (err)
+						console.log('Exception ! ', err);
+					else
+						console.log('OK');
+				});
 			});
 		} else if (files[name]['data'].length > DATA_BUFFER_LENGTH) {
 
@@ -114,7 +122,7 @@ io.sockets.on('connection', function (socket) {
 
 			fs.write(files[name]['handler'], files[name]['data'], null, 'Binary', function (err, written) {
 				files[name]['data'] = ""; // resets the buffer.
-				var rate = (files[name]['downloaded'] * 1000) / (new Date() - files[name]['lastDataReceivedDate']);
+				var rate = (data['data'].length * 1000) / (new Date() - files[name]['lastDataReceivedDate']);
 				files[name]['lastDataReceivedDate'] = new Date();
 				var place = files[name]['downloaded'] / BLOCK_SIZE;
 				var percent = (files[name]['downloaded'] / files[name]['fileSize']) * 100;
@@ -135,7 +143,7 @@ io.sockets.on('connection', function (socket) {
 
 		} else {
 			//console.log('file: [' + name + '] downloaded: ' + files[name]['downloaded']);
-			var rate = (files[name]['downloaded'] * 1000) / (new Date() - files[name]['lastDataReceivedDate']);
+			var rate = (data['data'].length * 1000) / (new Date() - files[name]['lastDataReceivedDate']);
 			files[name]['lastDataReceivedDate'] = new Date();
 			var place = files[name]['downloaded'] / BLOCK_SIZE;
 			var percent = (files[name]['downloaded'] / files[name]['fileSize']) * 100;
@@ -184,8 +192,18 @@ io.sockets.on('connection', function (socket) {
 		fs.unlink('temp/' + name, function (err) {
 			if (err)
 				console.log("Error occurred !", err);
-			else
+			else {
 				console.log('successfully deleted /temp/' + name);
+
+				// on tente de fermer le fichier ...
+				fs.close(files[name]['handler'], function (err) {
+					if (err)
+						console.log('Exception ! ', err);
+					else
+						console.log('OK');
+				});
+			}
 		});
 	});
+
 });
