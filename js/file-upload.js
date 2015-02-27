@@ -3,9 +3,10 @@ $(document).ready(function () {
 	if (window.File && window.FileReader) {
 		$('#uploadButton').click(startUpload);
 		$('#fileBox').change(fileChosen);
-		$('#uploadArea').append($('<p/>').text("Your browser supports the file API."));
+		$('#uploadInfo').html($('<p/>').text("Your browser supports the file API."));
 	} else {
-		$('#uploadArea').html("Your browser doesn't support the file API. Please update your browser.");
+		$('#uploadArea').hide();
+		$('#uploadInfo').html("Your browser doesn't support the file API. Please update your browser.");
 	}
 
 	var selectedFile;
@@ -31,14 +32,18 @@ $(document).ready(function () {
 		fileReader.readAsBinaryString(newFile);
 	});
 	socket.on('done', function (data) {
-		$('#uploadArea').empty();
-		$('#uploadArea').append($('<p/>').text("Nom du fichier: " + data.name));
-		$('#uploadArea').append($('<p/>').text("Taille du fichier (Mo): " + data.size));
-		$('#uploadArea').append($('<p/>').text("Téléchargé (Mo): " + data.downloaded));
-		$('#uploadArea').append($('<p/>').text("Date de début: " + data.startDate));
-		$('#uploadArea').append($('<p/>').text("Date de fin: " + data.finishDate));
-		$('#uploadArea').append($('<p/>').text("Temps écoulé (ms): " + data.elapsedTime));
-		$('#uploadArea').append($('<p/>').text("Taux de transfert (Mo/s): " + data.rate));
+		$('#uploadArea').show();
+		$('#uploadInfo').html($('<p/>').text("Nom du fichier: " + data.name));
+		$('#uploadInfo').append($('<p/>').text("Taille du fichier (Mo): " + data.size));
+		$('#uploadInfo').append($('<p/>').text("Téléchargé (Mo): " + data.downloaded));
+		$('#uploadInfo').append($('<p/>').text("Date de début: " + data.startDate));
+		$('#uploadInfo').append($('<p/>').text("Date de fin: " + data.finishDate));
+		$('#uploadInfo').append($('<p/>').text("Temps écoulé (ms): " + data.elapsedTime));
+		$('#uploadInfo').append($('<p/>').text("Taux de transfert (Mo/s): " + data.rate));
+		
+		// reset des inputs
+		$('#fileBox').val('');
+		$('#nameBox').val('');
 	});
 	socket.on('error', function (err) {
 		$('body').append($('<p/>').text(err));
@@ -50,14 +55,14 @@ $(document).ready(function () {
 			uploading = true;
 			fileReader = new FileReader();
 			name = $('#nameBox').val();
-			$('#uploadArea').empty();
-			$('#uploadArea').append("<span id='nameArea'>Uploading " + selectedFile.name + " as " + name + "</span>");
-			$('#uploadArea').append("<div id='rate'></div>");
-			$('#uploadArea').append("<div id='progressContainer'><div id='progressBar'></div></div><span id='percent'>0%</span>");
-			$('#uploadArea').append("<span id='uploaded'> - <span id='MB'>0</span>/" + toRoundedMegaByte(selectedFile.size) + "MB</span>");
-			$('#uploadArea').append("<button id='pause-upload' type='button' class='Button'>Pause</button>");
-			$('#uploadArea').append("<button id='resume-upload' type='button' class='Button'>Resume</button>");
-			$('#uploadArea').append("<button id='cancel-upload' type='button' class='Button'>Cancel</button>");
+			$('#uploadArea').hide();
+			$('#uploadInfo').html("<span id='nameArea'>Uploading " + selectedFile.name + " as " + name + "</span>");
+			$('#uploadInfo').append("<div id='rate'></div>");
+			$('#uploadInfo').append("<div id='progressContainer'><div id='progressBar'></div></div><span id='percent'>0%</span>");
+			$('#uploadInfo').append("<span id='uploaded'> - <span id='MB'>0</span>/" + toRoundedMegaByte(selectedFile.size) + "MB</span>");
+			$('#uploadInfo').append("<div><span><button id='pause-upload' type='button' class='Button'>Pause</button>");
+			$('#uploadInfo').append("<button id='resume-upload' type='button' class='Button'>Resume</button>");
+			$('#uploadInfo').append("<button id='cancel-upload' type='button' class='Button'>Cancel</button></span></div>");
 
 			fileReader.onload = function (evt) {
 				socket.emit('upload', {
@@ -96,7 +101,10 @@ $(document).ready(function () {
 				$(this).hide();
 				$('#resume-upload').hide();
 				$('#pause-upload').hide();
-				$('body').append($('<p/>').text('The file upload has been cancelled.'));
+				$('#uploadInfo').append($('<p/>').text('The file upload has been cancelled.'));
+				$('#uploadArea').show();
+				$('#fileBox').val('');
+				$('#nameBox').val('');
 			});
 		} else {
 			alert('Selected a file');
