@@ -1,0 +1,12 @@
+{
+	"name" : "file-upload",
+	"version" : "0.1.0",
+	"main" : "app.js",
+	"dependencies" : {
+		"socket.io" : "*",
+		"http" : "*",
+		"express" : "*"
+	},
+	"author" : "Quentin <kwentinn@gmail.com",
+	"description" : "Une messagerie temps réel avec Node.js et socket.io et MongoDb"
+}
