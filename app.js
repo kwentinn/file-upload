@@ -3,23 +3,27 @@ var exec = require('child_process').exec;
 var util = require('util');
 var express = require('express');
 var app = express();
+var ejs = require('ejs'); // templating ejs
+
+var DATA_BUFFER_LENGTH = 512 * 1024; // 512Ko
+var BLOCK_SIZE = 256 * 1024;
+var ONE_MB = 1024 * 1024;
+
+console.log("DATA_BUFFER_LENGTH=" + DATA_BUFFER_LENGTH + ", BLOCK_SIZE=" + BLOCK_SIZE + ", ONE_MB" + ONE_MB);
 
 /** socket.io */
 var server = require('http').Server(app).listen(8080);
 var io = require('socket.io')(server);
 
+app.set('views', __dirname + '/views'); // les vues se trouvent dans le répertoire "views"
+app.set('view engine', 'ejs'); // moteur de template = ejs
 app.use('/js', express.static(__dirname + '/js'));
 app.get('/', function (req, res, next) {
 	res.redirect('/index.html');
 });
 app.get('/index.html', function (req, res, next) {
-	fs.readFile(__dirname + '/index.html', function (err, data) {
-		if (err) {
-			res.writeHead(500);
-			return res.end("Error loading index.html");
-		}
-		res.writeHead(200);
-		res.end(data);
+	res.render('index.ejs', {
+		'blockSize' : BLOCK_SIZE
 	});
 });
 app.use(function (req, res, next) {
@@ -27,9 +31,6 @@ app.use(function (req, res, next) {
 	res.redirect('/');
 });
 
-var DATA_BUFFER_LENGTH = 1 * 1024 * 1024; // 10 MB
-var BLOCK_SIZE = 524288;
-var ONE_MB = 1024 * 1024;
 
 var files = {};
 io.sockets.on('connection', function (socket) {

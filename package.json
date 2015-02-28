@@ -1,11 +1,11 @@
 {
 	"name" : "file-upload",
-	"version" : "0.0.3",
+	"version" : "0.0.4",
 	"main" : "app.js",
 	"dependencies" : {
 		"socket.io" : "*",
-		"http" : "*",
-		"express" : "*"
+		"express" : "*",
+		"ejs" : "*"
 	},
 	"author" : "kwentinn@gmail.com",
 	"description" : "A basic file upload web app running on Node.js & socket.io"
