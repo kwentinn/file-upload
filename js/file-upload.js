@@ -137,4 +137,6 @@ $(document).ready(function () {
 		$('#MB').html(downloaded);
 		$('#rate').html(rate + ' Mo/s');
 	}
+
+	$(":file").filestyle();
 });

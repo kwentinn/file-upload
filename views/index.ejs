@@ -3,6 +3,8 @@
 	<head>
 		<meta charset="utf-8">
 		<title>File Uploader</title>
+		<link href="/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+		<link href="/bootstrap/css/bootstrap-theme.css" rel="stylesheet">
 	</head>
 	<body>
 		<script>var BLOCK_SIZE = <%= blockSize %>;</script>
@@ -17,8 +19,10 @@
 			<div id="uploadInfo"></div>
 		</div>
 		<!-- Placed at the end of the document so the pages load faster -->
-		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+		<script src="/jquery/jquery.min.js"></script>
+		<script src="/bootstrap/js/bootstrap.min.js"></script>
 		<script src="/socket.io/socket.io.js"></script>
+		<script src="/js/bootstrap-filestyle.js"></script>
 		<script src="/js/file-upload.js"></script>
 	</body>
 </html>

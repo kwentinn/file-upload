@@ -15,9 +15,13 @@ console.log("DATA_BUFFER_LENGTH=" + DATA_BUFFER_LENGTH + ", BLOCK_SIZE=" + BLOCK
 var server = require('http').Server(app).listen(8080);
 var io = require('socket.io')(server);
 
+// répertoires "publics"
+app.use('/js', express.static(__dirname + '/js'));
+app.use('/bootstrap', express.static(__dirname + '/node_modules/bootstrap/dist'));
+app.use('/jquery', express.static(__dirname + '/node_modules/jquery/dist'));
+
 app.set('views', __dirname + '/views'); // les vues se trouvent dans le répertoire "views"
 app.set('view engine', 'ejs'); // moteur de template = ejs
-app.use('/js', express.static(__dirname + '/js'));
 app.get('/', function (req, res, next) {
 	res.redirect('/index.html');
 });
@@ -30,7 +34,6 @@ app.use(function (req, res, next) {
 	// Page non trouvée ? redirection vers /
 	res.redirect('/');
 });
-
 
 var files = {};
 io.sockets.on('connection', function (socket) {
