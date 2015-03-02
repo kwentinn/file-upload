@@ -3,18 +3,20 @@ $(document).ready(function () {
 	if (window.File && window.FileReader) {
 		$('#uploadButton').click(startUpload);
 		$('#fileBox').change(fileChosen);
-		$('#uploadInfo').html($('<p/>').text("Your browser supports the file API."));
+		$('#alertArea').html("<strong>Good news:</strong> Your browser supports the <strong>file API</strong>.");
+		$('#alertArea').addClass("alert-info");
 
 		var fr = new FileReader();
 		if (!fr.readAsBinaryString) {
-			$('#uploadInfo').html($('<p/>').text('The fileReader.readAsBinaryString method is unavilable !'));
-			$('#uploadInfo').append($('<p/>').text('Please upgrade your browser or use another one.'));
+			$('#alertArea').text('The fileReader.readAsBinaryString method is unavailable! Please upgrade your browser or use another one.');
+			$('#alertArea').addClass("alert-danger");
 			$('#uploadArea').hide();
 		}
 		fr = null;
 	} else {
 		$('#uploadArea').hide();
-		$('#uploadInfo').html("Your browser doesn't support the file API. Please update your browser.");
+		$('#alertArea').html("Your browser doesn't support the file API. Please update your browser.");
+		$('#alertArea').addClass("alert-danger");
 	}
 
 	var selectedFile;
@@ -41,9 +43,6 @@ $(document).ready(function () {
 		if (selectedFile.slice) {
 			var end = start + Math.min(BLOCK_SIZE, (selectedFile.size - start));
 			newFile = selectedFile.slice(start, end);
-			console.dir(data);
-			console.log("start: " + start + ", Math.min(524288, (selectedFile.size - start)): " + Math.min(BLOCK_SIZE, (selectedFile.size - start)));
-			console.log("start + Math.min(524288, (selectedFile.size - start)): " + end);
 		} else
 			alert('slice method doesn\'t exist !');
 		fileReader.readAsBinaryString(newFile);
@@ -51,20 +50,21 @@ $(document).ready(function () {
 	});
 	socket.on('done', function (data) {
 		$('#uploadArea').show();
-		$('#uploadInfo').html($('<p/>').text("Nom du fichier: " + data.name));
-		$('#uploadInfo').append($('<p/>').text("Taille du fichier (Mo): " + data.size));
-		$('#uploadInfo').append($('<p/>').text("Téléchargé (Mo): " + data.downloaded));
-		$('#uploadInfo').append($('<p/>').text("Date de début: " + data.startDate));
-		$('#uploadInfo').append($('<p/>').text("Date de fin: " + data.finishDate));
-		$('#uploadInfo').append($('<p/>').text("Temps écoulé (ms): " + data.elapsedTime));
-		$('#uploadInfo').append($('<p/>').text("Taux de transfert (Mo/s): " + data.rate));
+		$('#uploadInfo').hide();
+		$('#alertArea').html($('<p/>').html("<strong>Nom du fichier:</strong> " + data.name));
+		$('#alertArea').append($('<p/>').html("<strong>Taille du fichier (Mo):</strong> " + data.size));
+		$('#alertArea').append($('<p/>').html("<strong>Téléchargé (Mo):</strong> " + data.downloaded));
+		$('#alertArea').append($('<p/>').html("<strong>Date de début:</strong> " + data.startDate));
+		$('#alertArea').append($('<p/>').html("<strong>Date de fin:</strong> " + data.finishDate));
+		$('#alertArea').append($('<p/>').html("<strong>Temps écoulé (ms):</strong> " + data.elapsedTime));
+		$('#alertArea').append($('<p/>').html("<strong>Taux de transfert (Mo/s):</strong> " + data.rate));
 
 		// reset des inputs
 		$('#fileBox').val('');
 		$('#nameBox').val('');
 	});
 	socket.on('error', function (err) {
-		$('body').append($('<p/>').text(err));
+		$('#alertArea').text(err);
 	});
 
 	var uploading = false;
@@ -74,14 +74,9 @@ $(document).ready(function () {
 			uploading = true;
 			name = $('#nameBox').val();
 			$('#uploadArea').hide();
-			$('#uploadInfo').html("<span id='nameArea'>Uploading " + selectedFile.name + " as " + name + "</span>");
-			$('#uploadInfo').append("<div id='rate'></div>");
-			$('#uploadInfo').append("<div id='progressContainer'><div id='progressBar'></div></div><span id='percent'>0%</span>");
-			$('#uploadInfo').append("<span id='uploaded'> - <span id='MB'>0</span>/" + toRoundedMegaByte(selectedFile.size) + "MB</span>");
-			$('#uploadInfo').append("<div><span><button id='pause-upload' type='button' class='Button'>Pause</button>");
-			$('#uploadInfo').append("<button id='resume-upload' type='button' class='Button'>Resume</button>");
-			$('#uploadInfo').append("<button id='cancel-upload' type='button' class='Button'>Cancel</button></span></div>");
-
+			$('#uploadInfo').show();
+			$('#MB').text(toRoundedMegaByte(selectedFile.size) + "MB");
+			
 			fileReader.onload = function (evt) {
 				socket.emit('upload', {
 					'name' : name,
@@ -94,49 +89,51 @@ $(document).ready(function () {
 			});
 
 			$('#resume-upload').hide();
-			$('#pause-upload').click(function () {
-				console.log('pausing upload!');
-				socket.emit('pause', {
-					'name' : name
-				});
-				$(this).hide();
-				$('#resume-upload').show();
-			});
-			$('#resume-upload').click(function () {
-				console.log('resuming upload!');
-				socket.emit('resume', {
-					'name' : name
-				});
-				$(this).hide();
-				$('#pause-upload').show();
-			});
-			$('#cancel-upload').click(function () {
-				console.log('cancelling upload!');
-				socket.emit('cancel', {
-					'name' : name
-				});
-
-				$(this).hide();
-				$('#resume-upload').hide();
-				$('#pause-upload').hide();
-				$('#uploadInfo').append($('<p/>').text('The file upload has been cancelled.'));
-				$('#uploadArea').show();
-				$('#fileBox').val('');
-				$('#nameBox').val('');
-			});
 		} else {
-			alert('Selected a file');
+			alert('Please select a file.');
 		}
 	}
 	function toRoundedMegaByte(val) {
 		return Math.round(val / (1024 * 1024));
 	}
 	function updateBar(percent, rate, downloaded) {
-		$('#progressBar').attr('style', 'width = ' + percent + '%');
+		$('div.progress-bar').attr('style', 'width : ' + Math.round(percent) + '%');
+		$('div.progress-bar').attr('aria-valuenow', Math.round(percent));
+		$('div.progress-bar').text(Math.round(percent) + "%");
 		$('#percent').html(Math.round(percent * 100) / 100 + '%');
-		$('#MB').html(downloaded);
+		$('#uploaded').html(downloaded + "MB");
 		$('#rate').html(rate + ' Mo/s');
 	}
+	
+	$('#pause-upload').click(function () {
+		socket.emit('pause', {
+			'name' : name
+		});
+		$(this).hide();
+		$('#resume-upload').show();
+	});
+	$('#resume-upload').click(function () {
+		socket.emit('resume', {
+			'name' : name
+		});
+		$(this).hide();
+		$('#pause-upload').show();
+	});
+	$('#cancel-upload').click(function () {
+		socket.emit('cancel', {
+			'name' : name
+		});
+
+		$(this).hide();
+		$('#resume-upload').hide();
+		$('#pause-upload').hide();
+		$('#uploadInfo').hide();
+		$('#alertArea').text('The file upload has been cancelled.');
+		$('#uploadArea').show();
+		$('#fileBox').val('');
+		$('#nameBox').val('');
+	});
 
 	$(":file").filestyle();
+	$('#uploadInfo').hide();
 });

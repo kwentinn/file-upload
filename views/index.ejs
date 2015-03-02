@@ -8,18 +8,59 @@
 	</head>
 	<body>
 		<script>var BLOCK_SIZE = <%= blockSize %>;</script>
-		<div id="uploadBox">
-			<h2>File Uploader</h2>
-			<div id="uploadArea">
-				<label for="fileBox">Choose a file</label>
-				<input type="file" id="fileBox"><br>
-				<label for="nameBox">Name: </label><input type="text" id="nameBox"><br>
-				<button type="button" id="uploadButton" class="Button">Upload</button>
+		
+		<div class="row">
+			<div class="col-xs-2"></div>
+			<div class="col-xs-8">
+				<div id="uploadBox">
+					<h2>File Uploader</h2>
+					<div id="uploadArea">
+						<label for="fileBox">Choose a file</label>
+						<input type="file" id="fileBox"><br>
+						<div class="input-group">
+							<span class="input-group-btn">
+								<button class="btn btn-default" type="button" id="uploadButton" >Upload !</button>
+							</span>
+							<input type="text" class="form-control" placeholder="Name" id="nameBox">
+						</div>
+					</div>
+				</div>
 			</div>
-			<div id="uploadInfo"></div>
+			<div class="col-xs-2"></div>
 		</div>
+		
+		<br/>
+		<div class="row" id="uploadInfo">
+			<div class="col-xs-2"></div>
+			<div class="col-xs-8">
+				<span id='nameArea'></span>
+				<div class="progress">
+					<div class="progress-bar" role="progressbar" aria-valuenow="5" aria-valuemin="0" aria-valuemax="100">0%</div>
+				</div>
+				<p id='rate'></p>
+				<span id='uploaded'> - <span id='MB'>0</span>MB</span>
+				<div>
+					<span>
+						<button id='pause-upload' type='button' class='btn btn-default'>Pause</button>
+						<button id='resume-upload' type='button' class='btn btn-default'>Resume</button>
+						<button id='cancel-upload' type='button' class='btn btn-default'>Cancel</button>
+					</span>
+				</div>
+			</div>
+			<div class="col-xs-2"></div>
+		</div>
+		
+		<div class="row">
+			<div class="col-xs-2"></div>
+			<div class="col-xs-8">
+				<div id="alertArea" class="alert"></div>
+			</div>
+			<div class="col-xs-2"></div>
+		</div>
+		
 		<!-- Placed at the end of the document so the pages load faster -->
-		<script src="/jquery/jquery.min.js"></script>
+		<!-- <script src="/jquery/jquery.min.js"></script> -->
+		<script src="//code.jquery.com/jquery-1.11.2.min.js"></script>
 		<script src="/bootstrap/js/bootstrap.min.js"></script>
 		<script src="/socket.io/socket.io.js"></script>
 		<script src="/js/bootstrap-filestyle.js"></script>
